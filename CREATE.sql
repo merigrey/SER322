@@ -3,7 +3,7 @@ use product_test;
 	use [Changed to match with your database];
 */
 
-create table products (
+create table product (
 	product_id int not null unique,			
     description varchar(255),				
     cost decimal(10,2) not null,			
@@ -17,12 +17,12 @@ create table products (
 );
 
 create table category (
-	category_id int not null unique,
+	cate_id int not null unique,
     category_name varchar(255),
     last_update timestamp,
     create_date timestamp,
     
-    primary key (category_id)
+    primary key (cate_id)
 );
 
 create table brand (
@@ -33,29 +33,29 @@ create table brand (
     primary key (brand_id)
 );
 
-create table products_category (
+create table product_category (
 	product_id int not null,
     category_id int not null,
     
-    foreign key (product_id) references products (product_id),
-    foreign key (category_id) references category (category_id)
+    foreign key (product_id) references product (product_id),
+    foreign key (cate_id) references category (cate_id)
 );
 
-create table products_brand (
+create table product_brand (
 	product_id int not null,
     brand_id int not null,
     
-    foreign key (product_id) references products (product_id),
+    foreign key (product_id) references product (product_id),
     foreign key (brand_id) references brand (brand_id)
 );
 
 
 create table customer (
-	customer_id int not null unique,
+	cust_id int not null unique,
     last_name varchar(255) not null,
     first_name varchar(255) not null,
     last_update timestamp,
-    create_date timestamp
+    created_date timestamp
 );
 
 create table cart (
@@ -85,59 +85,60 @@ create table cart (
 
 	cart_id int not null,
 	purchase_date timestamp not null,
-    customer_id int not null,
+    cust_id int not null,
     status ENUM ('PAID','HOLD','DROP'),
-    count int not null, 
-  --  cart_id_concat varchar(255) not null unique,
+	number_of_items int not null,
+  --  cart_id_concat varchar(255) not null unique,  --is this commented out for a reason?,
     /*constraint cart_id_concat*/ primary key (customer_id, purchase_date, cart_id),
-    foreign key (customer_id) references customer (customer_id)
+    foreign key (cust_id) references customer (cust_id)
 );
 
 
 create table customer_cart (
 	cart_id int not null,
-    customer_id int not null,
+	--created_date timestamp not null, --from ER diagram, remove if not necessary,
+    cust_id int not null,
     purchase_date timestamp not null,
-	foreign key (customer_id) references customer (customer_id),
-	foreign key (customer_id, purchase_date, cart_id) references cart (customer_id, purchase_date, cart_id)
+	foreign key (cust_id) references customer (cust_id),
+	foreign key (cust_id, purchase_date, cart_id) references cart (cust_id, purchase_date, cart_id)
 );
 
 
 create table trans (
-	customer_id int not null,
+	cust_id int not null,
 	trans_id int not null,
-    purchase_date timestamp not null,
+    paid_date timestamp not null,
     paid_method ENUM('CREDIT', 'CHECK'),
     paid_status  ENUM('SUCCESS', 'DECLINE', 'REVERT', 'REFUND'),
-    card_number int not null,
-	primary key (customer_id, purchase_date, trans_id)
+    card_number int not null,	-- ints only go up to 4 bytes, where credit card numbers are often 16 integers. We may need to use an 8-byte 'bigInt' or something.
+	primary key (cust_id, paid_date, trans_id)
 );
 
-create table trans_cart (
-	customer_id int not null,
+create table cart_trans (
+	cust_id int not null,
     trans_id int not null,
-    purchase_date timestamp not null,
+    paid_date timestamp not null,
     cart_id int not null,
-	foreign key (customer_id, purchase_date, cart_id) references cart (customer_id, purchase_date, cart_id),
-	foreign key (customer_id, purchase_date, trans_id) references trans (customer_id, purchase_date, trans_id)
+	foreign key (cust_id, paid_date, cart_id) references cart (cust_id, paid_date, cart_id),
+	foreign key (cust_id, paid_date, trans_id) references trans (cust_id, paid_date, trans_id)
 );
 
 
 create table search_history (
-	customer_id int not null,
+	cust_id int not null,
     product_id int,
     search_date datetime,
     search_description varchar(255),
-    search_status ENUM ('FOUND', 'NOT FOUND') not null,
-	foreign key (customer_id) references customer (customer_id),
-    foreign key (product_id) references products (product_id)
+    status ENUM ('FOUND', 'NOT FOUND') not null,
+	foreign key (cust_id) references customer (cust_id),
+    foreign key (product_id) references product (product_id)
 );
 
-create table product_cust(
-	customer_id int not null,
+create table product_customer(
+	cust_id int not null,
     product_id int not null,
-    purchase_data timestamp not null,
-    foreign key (customer_id) references customer (customer_id),
-    foreign key (product_id) references products (product_id)
+    purchased_date timestamp not null,
+    foreign key (cust_id) references customer (cust_id),
+    foreign key (product_id) references product (product_id)
 );
 
