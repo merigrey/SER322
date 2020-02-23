@@ -87,8 +87,9 @@ create table cart (
 	purchase_date timestamp not null,
     customer_id int not null,
     status ENUM ('PAID','HOLD','DROP'),
-    count int not null, 
-  --  cart_id_concat varchar(255) not null unique,
+    --count int not null, --COUNT is a keyword, removed and replaced with:
+	number_of_items int not null,
+  --  cart_id_concat varchar(255) not null unique,  --is this commented out for some reason?
     /*constraint cart_id_concat*/ primary key (customer_id, purchase_date, cart_id),
     foreign key (customer_id) references customer (customer_id)
 );
@@ -97,6 +98,7 @@ create table cart (
 create table customer_cart (
 	cart_id int not null,
     customer_id int not null,
+	--created_date timestamp not null, --from ER diagram, remove if not necessary,
     purchase_date timestamp not null,
 	foreign key (customer_id) references customer (customer_id),
 	foreign key (customer_id, purchase_date, cart_id) references cart (customer_id, purchase_date, cart_id)
@@ -109,7 +111,7 @@ create table trans (
     purchase_date timestamp not null,
     paid_method ENUM('CREDIT', 'CHECK'),
     paid_status  ENUM('SUCCESS', 'DECLINE', 'REVERT', 'REFUND'),
-    card_number int not null,
+    card_number int not null, --card numbers are often 16 integers, which is >4bytes, the max for int holders in Java?
 	primary key (customer_id, purchase_date, trans_id)
 );
 
